@@ -17,9 +17,9 @@ class GaussianNaiveBayes:
         ####################################
         # YOUR CODE HERE
         ####################################
-        # 
-        #
-        return None # Return the Likelihood
+        expo_val = -0.5 * ((x - mu) / std) ** 2
+        coeff_val = 1 / (std * np.sqrt(2 * np.pi))
+        return coeff_val * np.exp(expo_val)
         ####################################
 
     def fit(
@@ -41,8 +41,11 @@ class GaussianNaiveBayes:
                 ###################################
                 # YOUR CODE HERE
                 ###################################
-                #
-                #
+                feature_given_label = feature[(y == label)]
+                feature_mean_given_label = np.mean(feature_given_label)
+                feature_std_given_label = np.std(feature_given_label)
+                self.params[-1].append(feature_mean_given_label)
+                self.params[-1].append(feature_std_given_label)
                 ###################################
 
     def predict(
@@ -59,17 +62,18 @@ class GaussianNaiveBayes:
                 ###################################
                 # YOUR CODE HERE #
                 ###################################
-                #
-                #
+                label_prob = np.mean((self.y_train == label))
                 ###################################
 
                 # Calculating the posterior probability of the label
+                prob_sum = 0.0
                 for i in range(len(x)):
                     ##############################
                     # YOUR CODE HERE #
                     ##############################
-                    #
-                    #
-                    #############################
+                    prob_sum += np.log(1e-12+self._get_gaussian_likelihood(x[i], self.params[i][0], self.params[i][1]))
+                label_pos = np.where(self.labels == label)[0][0]
+                prob_y_given_X[label_pos] = np.exp(prob_sum) * label_prob
+                #############################
             preds.append(np.argmax(prob_y_given_X))
         return np.array(preds)
