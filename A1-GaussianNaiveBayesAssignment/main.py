@@ -2,8 +2,10 @@ from utils import load_data
 from model import GaussianNaiveBayes
 import numpy as np
 
-def get_conf_mat(no_of_labels, y_truth, y_pred) -> np.ndarray:
-    conf_matrix = np.zeros((no_of_labels, no_of_labels), dtype=np.int32)
+CLASS_COUNT = 10
+
+def get_conf_mat(y_truth, y_pred) -> np.ndarray:
+    conf_matrix = np.zeros((CLASS_COUNT, CLASS_COUNT), dtype=np.int32)
     for truth, pred in zip(y_truth, y_pred):
         conf_matrix[truth][pred] += 1
     return conf_matrix
@@ -25,6 +27,24 @@ def get_f1_score(conf_mat, label_idx):
     rec = get_recall(conf_mat, label_idx)
     f1_score_value = 2 * (prec * rec) / (prec + rec)
     return f1_score_value
+
+def print_metrics(y_given, y_pred):
+    
+    print("Confusion Matrix:")
+    confusion_matrix = get_conf_mat(y_given, y_pred)
+    print(confusion_matrix)
+    print("Precision:")
+    for label in range(CLASS_COUNT):
+        print(f"{get_precision(confusion_matrix, label):.5f} ", end="")
+    print("")
+    print("Recall:")
+    for label in range(CLASS_COUNT):
+        print(f"{get_recall(confusion_matrix, label):.5f} ", end="")
+    print("")
+    print("F1 score:")
+    for label in range(CLASS_COUNT):
+        print(f"{get_f1_score(confusion_matrix, label):.5f} ", end="")
+    print("")
 
 def main() -> None:
     # Load data
@@ -50,42 +70,12 @@ def main() -> None:
     #########################################
     # YOUR CODE HERE
     #########################################
-    LABEL_COUNT = 10
-    print("Train Data metrics:")
-    print("-------------------")
-    print("Confusion Matrix:")
-    confusion_matrix = get_conf_mat(LABEL_COUNT, y_train, y_train_pred)
-    print(confusion_matrix)
-    print("Precision:")
-    for label in range(LABEL_COUNT):
-        print(f"{get_precision(confusion_matrix, label)} ", end="")
-    print("")
-    print("Recall:")
-    for label in range(LABEL_COUNT):
-        print(f"{get_recall(confusion_matrix, label)} ", end="")
-    print("")
-    print("F1 score:")
-    for label in range(LABEL_COUNT):
-        print(f"{get_f1_score(confusion_matrix, label)} ", end="")
-    print("")
-
-    print("Test Data metrics:")
-    print("-------------------")
-    print("Confusion Matrix:")
-    confusion_matrix = get_conf_mat(LABEL_COUNT, y_test, y_test_pred)
-    print(confusion_matrix)
-    print("Precision:")
-    for label in range(LABEL_COUNT):
-        print(f"{get_precision(confusion_matrix, label)} ", end="")
-    print("")
-    print("Recall:")
-    for label in range(LABEL_COUNT):
-        print(f"{get_recall(confusion_matrix, label)} ", end="")
-    print("")
-    print("F1 score:")
-    for label in range(LABEL_COUNT):
-        print(f"{get_f1_score(confusion_matrix, label)} ", end="")
-    print("")
+    print(f"-------------------\nTrain Data metrics:\n-------------------")
+    print_metrics(y_train, y_train_pred)
+    print("-------------------\n")
+    print(f"-------------------\nTest Data metrics:\n-------------------")
+    print_metrics(y_test, y_test_pred)
+    print("-------------------\n")
     #########################################
     
 if __name__ == "__main__":
