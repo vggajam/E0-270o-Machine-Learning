@@ -47,9 +47,7 @@ class GaussianNaiveBayes:
                 # YOUR CODE HERE
                 ###################################
                 feature_given_label = feature[(y == label)]
-                feature_mean_given_label = np.mean(feature_given_label)
-                feature_std_given_label = np.std(feature_given_label)
-                self.params[feature_idx].append({'mean':feature_mean_given_label, 'std': feature_std_given_label})
+                self.params[feature_idx].append({'mean':np.mean(feature_given_label), 'std': np.std(feature_given_label)})
                 ###################################
 
     def predict(
