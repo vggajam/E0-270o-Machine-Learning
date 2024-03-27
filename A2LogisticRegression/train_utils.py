@@ -21,9 +21,10 @@ def calculate_loss(
     '''
     y_preds = model(X)
     if is_binary:
-        raise NotImplementedError("Implement binary cross-entropy loss here")
+        loss = y*np.log(y_preds) + (1-y)*np.log(1-y_preds)
     else:
-        raise NotImplementedError("Implement categorical cross-entropy loss here")
+        loss = np.log(np.max(y_preds, axis=-1))
+    loss = (-1/X.shape[0]) * np.sum(loss)
     return loss
 
 
@@ -43,9 +44,13 @@ def calculate_accuracy(
     '''
     y_preds = model(X)
     if is_binary:
-        raise NotImplementedError("Implement binary accuracy here")
+        BOUNDARY = 0.5
+        y_preds[y_preds>=BOUNDARY] = 1
+        y_preds[y_preds<BOUNDARY] = 0
+        acc = np.average(y_preds == y)
     else:
-        raise NotImplementedError("Implement categorical accuracy here")
+        labels = np.argmax(y_preds, axis=-1)
+        acc = np.average(labels == y)
     return acc
 
 
@@ -66,8 +71,11 @@ def evaluate_model(
         loss: float, loss of the model
         acc: float, accuracy of the model
     '''
-    raise NotImplementedError
+    # raise NotImplementedError
     # HINT use the calculate_loss and calculate_accuracy functions defined above
+    X_batch, y_batch = get_data_batch(X, y, batch_size)
+    loss = calculate_loss(model, X_batch, y_batch, is_binary)
+    acc = calculate_accuracy(model, X_batch, y_batch, is_binary)
     return loss, acc
 
 
@@ -116,14 +124,18 @@ def fit_model(
         
         # calculate gradient
         if is_binary:
-            grad_W = # TODO: calculate gradient of W for binary cross-entropy loss
-            grad_b = # TODO: calculate gradient of b for binary cross-entropy loss
+            grad_W = np.sum(np.dot(X_batch.T, (y_preds - y_batch))) 
+            grad_b = np.sum(np.mean(y_preds - y_batch, axis=0))
         else:
-            grad_W = # TODO: calculate gradient of W for categorical cross-entropy loss
-            grad_b = # TODO: calculate gradient of b for categorical cross-entropy loss
+            grad_W = np.mean(np.dot(X_batch.T, (y_preds - y_batch)))
+            grad_b = np.sum(np.mean(y_preds - y_batch, axis=0))
+
         
         # regularization
-        raise NotImplementedError("Implement L2 regularization here for both W and b")
+        # raise NotImplementedError("Implement L2 regularization here for both W and b")
+        reg_term = l2_lambda * np.sum(model.W ** 2)  # L2 regularization term
+        loss += reg_term  # Add regularization term to the loss
+        grad_W += 2 * l2_lambda * model.W  # Add regularization term to the weight gradients
         
         # clip gradient norm
         grad_norm = np.linalg.norm(grad_W) + np.linalg.norm(grad_b)
