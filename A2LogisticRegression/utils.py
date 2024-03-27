@@ -72,7 +72,8 @@ def get_data_batch(
     - X_batch: np.ndarray, batch of images
     - y_batch: np.ndarray, batch of labels
     '''
-    idxs = # TODO: get random indices of size batch_size from the dataset without replacement
+    # TODO: get random indices of size batch_size from the dataset without replacement
+    idxs = np.random.choice(X.shape[0], size=batch_size, replace=False) 
     return X[idxs], y[idxs]
 
 
@@ -87,7 +88,14 @@ def plot_losses(
         val_losses: list, validation losses
         title: str, title of the plot
     '''
-    raise NotImplementedError("Plot the training and validation losses.")
+    _, ax = plt.subplots()
+    ax.set_title(title)
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel('Loss')
+    ax.plot(train_losses, label='Training Loss', color='blue')
+    ax.plot(val_losses, label='Validation Loss', color='orange')
+    ax.legend()
+
     plt.savefig('loss.png')
 
 
@@ -102,5 +110,12 @@ def plot_accuracies(
         val_accs: list, validation accuracies
         title: str, title of the plot
     '''
-    raise NotImplementedError("Plot the training and validation accuracies.")
+    _, ax = plt.subplots()
+    ax.set_title(title)
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel('Accuracy')
+    ax.plot(train_accs, label='Training Accuracy', color='green')
+    ax.plot(val_accs, label='Validation Accuracy', color='purple')
+    ax.legend()
+
     plt.savefig('acc.png')
