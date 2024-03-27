@@ -62,7 +62,8 @@ class LogisticRegression(LinearModel):
         Returns:
             sigmoid of input data
         '''
-        raise NotImplementedError
+        np_exp_x = np.exp(x)
+        return np_exp_x/(1+np_exp_x)
     
     def forward(self, x: np.ndarray) -> np.ndarray:
         '''
@@ -74,7 +75,7 @@ class LogisticRegression(LinearModel):
         Returns:
             scalar output of logistic regression model
         '''
-        raise NotImplementedError
+        return self._sigmoid(super().forward(x))
 
 
 class SoftmaxRegression(LinearModel):
@@ -96,7 +97,9 @@ class SoftmaxRegression(LinearModel):
         Returns:
             softmax of input data
         '''
-        raise NotImplementedError
+        np_exp_x = np.exp(x)
+        np_exp_x_sum = np.sum(np_exp_x)
+        return np_exp_x/np_exp_x_sum
     
     def forward(self, x: np.ndarray) -> np.ndarray:
         '''
@@ -108,4 +111,4 @@ class SoftmaxRegression(LinearModel):
         Returns:
             scalar output of softmax regression model
         '''
-        raise NotImplementedError
+        return self._softmax(super().forward(x))
