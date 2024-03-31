@@ -75,7 +75,7 @@ class LogisticRegression(LinearModel):
         Returns:
             scalar output of logistic regression model
         '''
-        return self._sigmoid(super().forward(x))
+        return self._sigmoid(super().forward(x)).reshape(-1)
 
 
 class SoftmaxRegression(LinearModel):
@@ -111,4 +111,4 @@ class SoftmaxRegression(LinearModel):
         Returns:
             scalar output of softmax regression model
         '''
-        return self._softmax(super().forward(x))
+        return self._softmax(super().forward(x)).reshape(-1, self.out_dim)
