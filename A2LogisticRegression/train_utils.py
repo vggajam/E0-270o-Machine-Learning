@@ -23,8 +23,9 @@ def calculate_loss(
     if is_binary:
         loss = y*np.log(y_preds) + (1-y)*np.log(1-y_preds)
     else:
-        loss = np.log(np.max(y_preds, axis=-1))
-    loss = (-1/X.shape[0]) * np.sum(loss)
+        y_pred_prob = (np.eye(10)[y] @ y_preds.T).reshape(-1)
+        loss = np.log(y_pred_prob)
+    loss = -1 * np.mean(loss)
     return loss
 
 
@@ -47,10 +48,9 @@ def calculate_accuracy(
         BOUNDARY = 0.5
         y_preds[y_preds>=BOUNDARY] = 1
         y_preds[y_preds<BOUNDARY] = 0
-        acc = np.average(y_preds == y)
     else:
-        labels = np.argmax(y_preds, axis=-1)
-        acc = np.average(labels == y)
+        y_preds = np.argmax(y_preds, axis=1).reshape(-1)
+    acc = np.mean(y_preds == y)
     return acc
 
 
@@ -73,9 +73,8 @@ def evaluate_model(
     '''
     # raise NotImplementedError
     # HINT use the calculate_loss and calculate_accuracy functions defined above
-    X_batch, y_batch = get_data_batch(X, y, batch_size)
-    loss = calculate_loss(model, X_batch, y_batch, is_binary)
-    acc = calculate_accuracy(model, X_batch, y_batch, is_binary)
+    loss = calculate_loss(model, X, y, is_binary)
+    acc = calculate_accuracy(model, X, y, is_binary)
     return loss, acc
 
 
@@ -124,18 +123,17 @@ def fit_model(
         
         # calculate gradient
         if is_binary:
-            grad_W = np.sum(np.dot(X_batch.T, (y_preds - y_batch))) 
-            grad_b = np.sum(np.mean(y_preds - y_batch, axis=0))
+            grad_W = np.mean((y_preds - y_batch) * X_batch.T, axis=1).reshape((-1,1))
+            grad_b = np.mean(y_preds - y_batch)
         else:
-            grad_W = np.mean(np.dot(X_batch.T, (y_preds - y_batch)))
-            grad_b = np.sum(np.mean(y_preds - y_batch, axis=0))
+            grad_W = (1/len(y_batch))*(X_batch.T @ (np.eye(10)[y_batch] - y_preds))
+            grad_b = np.mean((np.eye(10)[y_batch] - y_preds), axis=0)
 
         
         # regularization
         # raise NotImplementedError("Implement L2 regularization here for both W and b")
-        reg_term = l2_lambda * np.sum(model.W ** 2)  # L2 regularization term
-        loss += reg_term  # Add regularization term to the loss
-        grad_W += 2 * l2_lambda * model.W  # Add regularization term to the weight gradients
+        loss += (l2_lambda * np.sum(model.W ** 2))  # Add regularization term to the loss
+        grad_W += (2 * l2_lambda * model.W)  # Add regularization term to the weight gradients
         
         # clip gradient norm
         grad_norm = np.linalg.norm(grad_W) + np.linalg.norm(grad_b)
@@ -166,5 +164,7 @@ def fit_model(
             )
             
             # use early stopping if necessary
+            if val_acc > 0.995:
+                break
     
     return train_losses, train_accs, val_losses, val_accs
