@@ -1,5 +1,5 @@
 from model import KMeans
-from utils import get_image, show_image, save_image, error
+from utils import get_image, show_image, save_image, error, plot_and_save_k_vs_mse
 
 
 def main():
@@ -10,26 +10,31 @@ def main():
     # reshape image
     image = image.reshape(image.shape[0] * image.shape[1], image.shape[2])
 
-    # create model
-    num_clusters = 50 # CHANGE THIS
-    kmeans = KMeans(num_clusters)
+    k_vals = [2,5,10,20,50]
+    mse_vals = []
+    for num_clusters in k_vals:
+        # create model
+        kmeans = KMeans(num_clusters)
 
-    # fit model
-    kmeans.fit(image)
+        # fit model
+        kmeans.fit(image)
 
-    # replace each pixel with its closest cluster center
-    image = kmeans.replace_with_cluster_centers(image)
+        # replace each pixel with its closest cluster center
+        image_clustered = kmeans.replace_with_cluster_centers(image)
 
-    # reshape image
-    image_clustered = image.reshape(img_shape)
+        # reshape image
+        image_clustered = image_clustered.reshape(img_shape)
 
-    # Print the error
-    print('MSE:', error(image, image_clustered))
+        # Print the error
+        mse = error(image, image_clustered)
+        mse_vals.append(mse)
+        print(f'k={num_clusters}; MSE: {mse}')
 
-    # show/save image
-    # show_image(image)
-    save_image(image_clustered, f'image_clustered_{num_clusters}.jpg')
+        # show/save image
+        # show_image(image)
+        save_image(image_clustered, f'image_clustered_{num_clusters}.jpg')
 
+    plot_and_save_k_vs_mse(k_vals, mse_vals)
 
 
 if __name__ == '__main__':

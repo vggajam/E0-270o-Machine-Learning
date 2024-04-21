@@ -16,4 +16,12 @@ def save_image(image, image_path):
 
 def error(original_image: np.ndarray, clustered_image: np.ndarray) -> float:
     # Returns the Mean Squared Error between the original image and the clustered image
-    raise NotImplementedError
+    return np.linalg.norm(original_image.reshape(-1)-clustered_image.reshape(-1))
+
+def plot_and_save_k_vs_mse(xpoints, ypoints):
+    plt.plot(xpoints, ypoints, marker="x")
+    plt.title("K vs MSE")
+    plt.xlabel("number of clusters ( K )")
+    plt.ylabel("MSE")
+    plt.savefig("k_vs_mse.png")
+    plt.show()
